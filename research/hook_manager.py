@@ -6,6 +6,7 @@ import frida
 
 ALL_METHODS_HOOK = '*'
 
+
 @dataclass(frozen=False)
 class HTTPFlow:
     """
@@ -23,12 +24,14 @@ class HTTPFlow:
         nonce = self.nonce
         print(f'{self.method} {self.route} ({nonce=})')
 
+
 class HookDataType(Enum):
     """
     Enumerates the possible data types that can be sent from the server to the manager.
     """
     REQUEST = 'request'
     RESPONSE = 'response'
+
 
 class HookManager:
     def __init__(self):
@@ -81,6 +84,7 @@ class HookManager:
 
         if data_type is HookDataType.RESPONSE:
             return self._handle_response_message(nonce, data)
+
 
 def hook(manager: HookManager, route: str, method=ALL_METHODS_HOOK):
     def hook_decorator(func):
