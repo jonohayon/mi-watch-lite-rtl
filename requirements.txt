@@ -1,0 +1,17 @@
+arc4==0.0.4
+astroid==2.9.0
+colorama==0.4.4
+decorator==5.1.0
+frida==15.1.14
+frida-tools==10.4.1
+isort==5.10.1
+lazy-object-proxy==1.7.1
+mccabe==0.6.1
+platformdirs==2.4.0
+prompt-toolkit==3.0.24
+Pygments==2.10.0
+pylint==2.12.2
+toml==0.10.2
+typing_extensions==4.0.1
+wcwidth==0.2.5
+wrapt==1.13.3
