@@ -19,6 +19,10 @@ class HTTPFlow:
     req_body: str
     res_body: str
 
+    def print_summary(self):
+        nonce = self.nonce
+        print(f'{self.method} {self.route} ({nonce=})')
+
 class HookDataType(Enum):
     """
     Enumerates the possible data types that can be sent from the server to the manager.
@@ -59,7 +63,7 @@ class HookManager:
         method = flow.method
 
         if self.verbose:
-            print(flow)
+            flow.print_summary()
 
         if route in self._hooks:
             method_pattern = method if method in self._hooks[route] else ALL_METHODS_HOOK

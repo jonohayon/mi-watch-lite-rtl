@@ -1,3 +1,4 @@
+from argparse import ArgumentParser, Namespace
 from sys import argv, stdin
 
 from frida import get_device_manager
@@ -16,13 +17,14 @@ def get_usb_device() -> Device:
     device_manager = get_device_manager()
     return device_manager.get_device_matching(lambda dev: dev.type == 'usb')
 
-def main(server_filename: str):
+def main(cli_args: Namespace):
+    HOOK_MANAGER.verbose = cli_args.verbose
     device = get_usb_device()
     pid = device.spawn([XIAOMI_WEAR_IDENTIFIER])
     print(f'Launched {XIAOMI_WEAR_IDENTIFIER} at {pid}')
     session = device.attach(pid)
     try:
-        with open(server_filename, 'rt') as server_file:
+        with open(cli_args.server_script, 'rt') as server_file:
             server_script = server_file.read()
             script = session.create_script(server_script)
             script.on('message', HOOK_MANAGER.handle_message)
@@ -35,4 +37,8 @@ def main(server_filename: str):
         device.kill(pid)
 
 if __name__ == '__main__':
-    main(argv[1])
+    parser = ArgumentParser(description='HTTP hooks for the Xiaomi Wear app')
+    parser.add_argument('-S', '--server-script', type=str, help='Path to the Frida server script.', required=True)
+    parser.add_argument('-v', '--verbose', action='store_true', help='Print all of the requests.')
+    args = parser.parse_args()
+    main(args)
