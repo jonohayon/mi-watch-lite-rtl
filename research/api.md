@@ -151,3 +151,12 @@ required. This is managed using the `HookManager` class, and specific hooks are 
 There's a default general hook installed (can be enabled/disabled using the `set_verbosity` function) that prints the
 request data to the screen.
 
+As I noticed all interesting communication is actually encrypted, I only needed to hook `CloudUtil::encryptParams` in
+order to look on the traffic, which is what the Frida script actually does. In order to use the hooks, run the following
+from the top-level of this project:
+```bash
+python3 -m research.hooks research/hooks-server.js
+```
+
+This will setup the Python hooks and start the Frida script on the Genymotion device (or an actual Android device
+connected via USB).
