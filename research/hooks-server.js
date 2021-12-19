@@ -9,7 +9,6 @@ const getCloudUtil = (
 }
 
 const JavaString = Java.use('java.lang.String')
-const JavaHashMapNode = Java.use('java.util.HashMap$Node')
 
 const DATA_KEY = JavaString.$new('data')
 

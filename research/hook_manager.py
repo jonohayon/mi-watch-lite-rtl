@@ -31,11 +31,41 @@ class HookManager:
         self._hooks = {}
         self._flows = {}
 
+        self.verbose = False
+
     def add_hook(self, route: str, method: str, hook_func):
         if route not in self._hooks:
             self._hooks[route] = {}
 
         self._hooks[route][method] = hook_func
+
+    def _handle_request_message(self, nonce: str, data: dict):
+        self._flows[nonce] = HTTPFlow(
+            nonce=nonce,
+            method=data['method'],
+            route=data['route'],
+            req_body=data['body'],
+            res_body=''
+        )
+
+    def _handle_response_message(self, nonce: str, data: dict):
+        if nonce not in self._flows:
+            print(f"{nonce} doesn't exist!")
+            return
+
+        flow = self._flows[nonce]
+        flow.res_body = data['body']
+        route = flow.route
+        method = flow.method
+
+        if self.verbose:
+            print(flow)
+
+        if route in self._hooks:
+            method_pattern = method if method in self._hooks[route] else ALL_METHODS_HOOK
+            if method_pattern in self._hooks[route]:
+                hook = self._hooks[route][method_pattern]
+                return hook(flow)
 
     def handle_message(self, message, *args, **kwargs):
         data = json_loads(message['payload'])
@@ -43,31 +73,10 @@ class HookManager:
         nonce = data['nonce']
 
         if data_type is HookDataType.REQUEST:
-            self._flows[nonce] = HTTPFlow(
-                nonce=nonce,
-                method=data['method'],
-                route=data['route'],
-                req_body=data['body'],
-                res_body=''
-            )
-            return
+            return self._handle_request_message(nonce, data)
 
         if data_type is HookDataType.RESPONSE:
-            if nonce not in self._flows:
-                print(f"{nonce} doesn't exist!!")
-                return
-
-            flow = self._flows[nonce]
-            flow.res_body = data['body']
-            print(flow)
-
-            route = flow.route
-            method = flow.method
-            if route in self._hooks:
-                method_pattern = method if method in self._hooks[route] else ALL_METHODS_HOOK
-                if method_pattern in self._hooks[route]:
-                    hook = self._hooks[route][method_pattern]
-                    return hook(flow)
+            return self._handle_response_message(nonce, data)
 
 def hook(manager: HookManager, route: str, method=ALL_METHODS_HOOK):
     def hook_decorator(func):
