@@ -1,10 +1,10 @@
-API research
+Getting the firmware
 ===
 
 # Goals
  - Find out how to download a firmware for a device
- - Find out general abilities that the API serves
  - Learn how to use new tools (for example, Frida)
+ - Nice to have - learn about the API, see if there's anything relevant for my usage
 
 # Research
 I'm using the iOS 'Mi Wear' app to configure the device and update its firmware. Therefore, that's where I started.
@@ -161,6 +161,43 @@ python3 -m research.hooks research/hooks-server.js
 This will setup the Python hooks and start the Frida script on the Genymotion device (or an actual Android device
 connected via USB).
 
-Fragment: ```
-com.xiaomi.wearable.home.devices.common.device.add.ScanAutoSelectDeviceFragment
+### Finding the firmware download code
+Now that I had a proper infrastructure to hook into HTTP methods, I wanted to find the code that's in charge of
+downloading the firmware update. As I said before, my device requires a firmware update, but for some reason the app
+won't actually update it, so I could test the download feature using it (I got a physical device to test this on, a Moto
+X Play XT1562 with Android 7.1.1).
+
+It's worth noting that the Xiaomi app supports a _lot_ of wearable devices, which are divided by the app into three
+categories - BLE devices, Huami devices and Wear OS devices. Wear OS is the name of Android for wearables, and BLE
+means that the device uses a proprietary Xiaomi protocol and is based on a Nordic Semiconductors BLE chip (such as the
+common nRF52840). I have no idea what Huami means, but google says it's one of Xiaomi's manufacturing subsidiaries.
+
+Trying to update the firmware from the Android app failed for some reason, posting a toast with the message "Couldn't
+obtain the firmware version". Looking for this string in the app's code resulted in the resource id `firmware_check_version_failed`
+which is used in 4 places - two times in the class `com.xiaomi.wearable.home.devices.ble.page.BleSettingItemsFragment`
+and two in `com.xiaomi.wearable.home.devices.ble.setting.ui.BleSettingItemsFragment`, both of which seem to include
+pretty much the same code. I was pleased to find that all of them essentially resulted in something like this:
+```java
+Bundle bundle = new Bundle();
+bundle.putSerializable(BaseFragment.KEY_PARAM1, latestVersion);
+bundle.putString(BaseFragment.KEY_PARAM2, this.f.getDid());
+bundle.putBoolean(BleUpdateFragment.j, z2);
+gotoPage(BleUpdateFragment.class, bundle, false);
 ```
+
+Cleaning up the code:
+```java
+Bundle bundle = new Bundle();
+bundle.putSerializable("key_param1", latestVersion);
+bundle.putString("key_param2", this.bluetoothDevice.getDid());
+bundle.putBoolean("key_store_mdoe", storeMode);
+gotoPage(BleUpdateFragment.class, bundle, false);
+```
+
+Looking on the `BleUpdateFragment` class, I was able to split the "firmware update" process into two distinct processes,
+both of which need to be researched:
+ - The firmware download process, which is what I've been researching so far
+ - The firmware _sync_ process, which is the flow that uploads the downloaded firmware onto the device via Bluetooth.
+   I still didn't start to research this, but I'm looking on relevant stuff while researching the network part of the
+   process.
+Other than that the fragment class didn't give me a lot of information unfortunately.
