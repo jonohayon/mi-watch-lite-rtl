@@ -43,8 +43,6 @@ const encryptParamsHook = (method, route, dataHashMap, nonce, ssecurity) => {
   sendData(nonce, DATA_TYPES.REQUEST, requestData)
 }
 
-const encryptParams2Hook = console.log
-
 const decryptResponseHook = (decryptedContent, nonce, ssecurity) => {
   const responseData = { ssecurity, body: decryptedContent }
   sendData(nonce, DATA_TYPES.RESPONSE, responseData)
@@ -59,8 +57,9 @@ const hookCloudUtil = CloudUtil => {
     return this.encryptParams(...arguments)
   }
 
+  // TODO - Hook on encryptParams2
   CloudUtil.encryptParams2.implementation = function () {
-    enryptedParams2Hook(...arguments)
+    // enryptedParams2Hook(...arguments)
     return this.encryptParams2(...arguments)
   }
 

@@ -160,3 +160,7 @@ python3 -m research.hooks research/hooks-server.js
 
 This will setup the Python hooks and start the Frida script on the Genymotion device (or an actual Android device
 connected via USB).
+
+Fragment: ```
+com.xiaomi.wearable.home.devices.common.device.add.ScanAutoSelectDeviceFragment
+```
