@@ -14,6 +14,18 @@ HOOK_MANAGER = HookManager()
 def get_bound_devices_hook(flow: HTTPFlow):
     print(flow)
 
+@hook(manager=HOOK_MANAGER, route='/device/bledevice_info')
+def bledevice_info(flow: HTTPFlow):
+    print(flow)
+
+@hook(manager=HOOK_MANAGER, route='/version/check_upgrade')
+def check_upgrade(flow: HTTPFlow):
+    print(flow)
+
+@hook(manager=HOOK_MANAGER, route='/healthapp/device/ot_device_upgrade')
+def ot_device_upgrade(flow: HTTPFlow):
+    print(flow)
+
 
 def get_usb_device() -> Device:
     device_manager = get_device_manager()

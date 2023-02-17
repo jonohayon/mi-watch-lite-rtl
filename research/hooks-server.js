@@ -9,6 +9,7 @@ const getCloudUtil = (
 }
 
 const JavaString = Java.use('java.lang.String')
+const Intent = Java.use('android.content.Intent')
 
 const DATA_KEY = JavaString.$new('data')
 
@@ -26,6 +27,7 @@ const sendData = (nonce, type, data) => {
   const content = { nonce, type, ...data }
   send(JSON.stringify(content))
 }
+
 
 /**
  * @description Hook for the com.xiaomi.common.crypt.CloudUtil::encryptParams function. Receives its original arguments
@@ -71,7 +73,16 @@ const hookCloudUtil = CloudUtil => {
   }
 }
 
+const launchActivity = (currentActivity, newActivityClassName) => {
+  const newActivity = Java.use(newActivityClassName)
+  const newIntent = Intent.$new(currentActivity, newActivity.class)
+  currentActivity.startActivity(newIntent);
+}
+
 Java.perform(() => {
   const cloudUtilClass = getCloudUtil()
   hookCloudUtil(cloudUtilClass)
+
+  // // Launch debug activity
+  // const debugActivityName = 'com.xiaomi.wearable.common.test.DebugActivity'
 })
